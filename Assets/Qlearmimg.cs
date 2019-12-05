@@ -23,7 +23,9 @@ public class Qlearmimg : MonoBehaviour
     float[][] reward;
     float[][] quality_mat;
     // Start is called before the first frame update
-
+    [SerializeField]
+    private float speed = 0.000001f;
+    List<KeyValuePair<int, int>> cur_next = new List<KeyValuePair<int, int>>();
     void Awake()
     {
 
@@ -56,7 +58,7 @@ public class Qlearmimg : MonoBehaviour
         train(transition_mat, reward, quality_mat, gamma, learning_rate, goal, max_epoch);
         //yield return new WaitForSeconds(200.5f);
 
-        agent_walk(0, goal, quality_mat);
+        agent_walk(1, goal, quality_mat);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -94,44 +96,81 @@ public class Qlearmimg : MonoBehaviour
     {
         Debug.Log("Moved to first");
         yield return new WaitForSeconds(10.5f);
-        Agent.transform.position = green_01.transform.position;
-        yield return new WaitForSeconds(20.5f);
+        while (Agent.transform.position != green_01.transform.position)
+        {
+            float step = speed * Time.deltaTime;
+            Agent.transform.position = Vector3.MoveTowards(Agent.transform.position, green_01.transform.position, step);
+
+        }
+
+        // Agent.transform.position = green_01.transform.position;
+        //yield return new WaitForSeconds(20.5f);
     }
     IEnumerator move_10()
     {
         Debug.Log("Moved to second");
         yield return new WaitForSeconds(10.5f);
-        Agent.transform.position = green_10.transform.position;
-        yield return new WaitForSeconds(20.5f);
+        while (Agent.transform.position != green_10.transform.position)
+        {
+            float step = speed * Time.deltaTime;
+            Agent.transform.position = Vector3.MoveTowards(Agent.transform.position, green_10.transform.position, step);
+
+        }
+        //Agent.transform.position = green_10.transform.position;
+        //yield return new WaitForSeconds(20.5f);
     }
     IEnumerator move_12()
     {
         Debug.Log("Moved to third");
         yield return new WaitForSeconds(10.5f);
-        Agent.transform.position = green_12.transform.position;
-        yield return new WaitForSeconds(20.5f);
+        while (Agent.transform.position != green_12.transform.position)
+        {
+            float step = speed * Time.deltaTime;
+            Agent.transform.position = Vector3.MoveTowards(Agent.transform.position, green_12.transform.position, step);
+
+        }
+        // Agent.transform.position = green_12.transform.position;
+        //yield return new WaitForSeconds(20.5f);
     }
     IEnumerator move_22()
     {
         Debug.Log("Moved to fourth");
         yield return new WaitForSeconds(10.5f);
-        Agent.transform.position = green_22.transform.position;
-        yield return new WaitForSeconds(20.5f);
+        while (Agent.transform.position != green_22.transform.position)
+        {
+            float step = speed * Time.deltaTime;
+            Agent.transform.position = Vector3.MoveTowards(Agent.transform.position, green_22.transform.position, step);
+
+        }
+        //Agent.transform.position = green_22.transform.position;
+        //yield return new WaitForSeconds(20.5f);
     }
     IEnumerator move_23()
     {
         Debug.Log("Moved to fifth");
         yield return new WaitForSeconds(10.5f);
-        Agent.transform.position = green_23.transform.position;
-        yield return new WaitForSeconds(20.5f);
+        while (Agent.transform.position != green_23.transform.position)
+        {
+            float step = speed * Time.deltaTime;
+            Agent.transform.position = Vector3.MoveTowards(Agent.transform.position, green_23.transform.position, step);
+
+        }
+        //Agent.transform.position = green_23.transform.position;
+        //yield return new WaitForSeconds(20.5f);
     }
 
     IEnumerator move_33()
     {
         Debug.Log("Moved to sixth");
         yield return new WaitForSeconds(10.5f);
-        Agent.transform.position = green_33.transform.position;
-        yield return new WaitForSeconds(20.5f);
+        while (Agent.transform.position != green_33.transform.position)
+        {
+            float step = speed * Time.deltaTime;
+            Agent.transform.position = Vector3.MoveTowards(Agent.transform.position, green_33.transform.position, step);
+
+        }
+        //Agent.transform.position = green_33.transform.position;
+        //yield return new WaitForSeconds(20.5f);
     }
 
 
@@ -149,36 +188,6 @@ public class Qlearmimg : MonoBehaviour
                 List<int> possiblenextsteps = GetPossibleStates(next_state, transition_mat);
                 Debug.Log("Current" + current_state);
                 Debug.Log("Next" + next_state);
-                if (current_state == 0 && next_state == 1)
-                {
-                    StartCoroutine(move_01());
-                    //Agent.transform.position = green_01.transform.position;
-
-
-                }
-                else if (current_state == 1 && next_state == 0)
-                {
-                    StartCoroutine(move_10());
-                    //Agent.transform.position = green_10.transform.position;
-                }
-
-                else if (current_state == 1 && next_state == 2)
-                {
-                    StartCoroutine(move_12());
-                    //Agent.transform.position = green_12.transform.position;
-                }
-
-                else if (current_state == 2 && next_state == 2)
-                {
-                    StartCoroutine(move_22());
-                    //Agent.transform.position = green_22.transform.position;
-                }
-
-                else if (current_state == 2 && next_state == 3)
-                {
-                    StartCoroutine(move_23());
-                    //Agent.transform.position = green_23.transform.position;
-                }
 
 
                 float maxq = float.MinValue;
@@ -200,7 +209,7 @@ public class Qlearmimg : MonoBehaviour
                 if (current_state == goal)
                 {
                     //Agent.transform.position = green_33.transform.position;
-                    StartCoroutine(move_33());
+                    //StartCoroutine(move_33());
                     Debug.Log("Reached");
 
                     break;
@@ -241,13 +250,68 @@ public class Qlearmimg : MonoBehaviour
         {
             next = argmax_value(quality_mat[cur]);
             Debug.Log(next);
-
+            cur_next.Add(new KeyValuePair<int, int>(cur, next));
             cur = next;
         }
         Debug.Log("done");
+        cur_next.Add(new KeyValuePair<int, int>(goal, goal));
+        StartCoroutine(agent_move(cur_next));
+
+
+
+
+
+
+
     }
+    IEnumerator agent_move(List<KeyValuePair<int, int>> cur_next)
+    {
+        int current_state, next_state;
+        foreach (var i in cur_next)
+        {
+            yield return new WaitForSeconds(1f);
+            Debug.Log("Out_1" + i);
+            current_state = i.Key;
+            next_state = i.Value;
+            if (current_state == 0 && next_state == 1)
+            {
+                StartCoroutine(move_01());
+                //Agent.transform.position = green_01.transform.position;
 
 
+            }
+            else if (current_state == 1 && next_state == 0)
+            {
+                StartCoroutine(move_10());
+                //Agent.transform.position = green_10.transform.position;
+            }
+
+            else if (current_state == 1 && next_state == 2)
+            {
+                StartCoroutine(move_12());
+                //Agent.transform.position = green_12.transform.position;
+            }
+
+            else if (current_state == 2 && next_state == 2)
+            {
+                StartCoroutine(move_22());
+                //Agent.transform.position = green_22.transform.position;
+            }
+
+            else if (current_state == 2 && next_state == 3)
+            {
+                StartCoroutine(move_23());
+                //Agent.transform.position = green_23.transform.position;
+            }
+
+            else if (current_state == 3 && next_state == 3)
+            {
+                StartCoroutine(move_33());
+                //Agent.transform.position = green_23.transform.position;
+            }
+        }
+
+    }
 
     public float[][] Create(int size)
     {
@@ -296,3 +360,4 @@ public class Qlearmimg : MonoBehaviour
     }
 
 }
+

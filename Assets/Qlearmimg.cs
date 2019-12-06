@@ -1,9 +1,16 @@
-﻿using System.Collections;
+﻿//Source code template for Q-learning to implement a simple maze of 4*4 dimension.To change the dimension of the maze 
+//update the size ,goal and provide the correct indices(adjacency matrix) of transition matrix,q matrix and reward matrix
+//in agent_walk function put any index<size as a starting point for the Agent to reach the maze end based on the available path
+//the matrices are adjacency matrices.i.e if an Agent is at state 1 wants to tmove to state 2 then the adj_mat[1][2] gets update accordingly.
+//Uses the standardised Q-Learning formulation based on MDP /Bellman formulations.s
+
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Qlearmimg : MonoBehaviour
-{
+{//variable declarations
     [SerializeField]
     private GameObject Agent;
     [SerializeField]
@@ -15,12 +22,15 @@ public class Qlearmimg : MonoBehaviour
     static float learning_rate = 0.5f;
     [SerializeField]
     static float gamma = 0.5f;
+    //final destination of the maze
     int goal = 3;
     [SerializeField]
     int max_epoch = 1000;
-
+    //transition matrix
     float[][] transition_mat;
+    //reward matrix
     float[][] reward;
+    //q value matrix
     float[][] quality_mat;
     // Start is called before the first frame update
     [SerializeField]
@@ -40,7 +50,7 @@ public class Qlearmimg : MonoBehaviour
     }
 
     void Start()
-    {
+    {//create the matrices with some reward probabilities
         transition_mat = Create(size);
         reward = create_reward(size);
         quality_mat = create_quality(size);
@@ -48,7 +58,7 @@ public class Qlearmimg : MonoBehaviour
 
 
 
-
+        //train the agent
         StartCoroutine(Train(transition_mat, reward, quality_mat, gamma, learning_rate, goal, max_epoch));
 
     }
@@ -70,6 +80,7 @@ public class Qlearmimg : MonoBehaviour
     {
 
     }
+    //select best states at a particular instance based on probabilities
     public List<int> GetPossibleStates(int s, float[][] transition_mat)
     {
         List<int> states = new List<int>();
@@ -84,6 +95,7 @@ public class Qlearmimg : MonoBehaviour
         return states;
 
     }
+    //get  random state from chosen best states
     public int GetProbNextState(int s, float[][] transition_mat)
     {
         List<int> getpossible_states = GetPossibleStates(s, transition_mat);
@@ -91,7 +103,7 @@ public class Qlearmimg : MonoBehaviour
         return getpossible_states[randomize];
 
     }
-
+    //enumerator functions to move the agent after learning
     IEnumerator move_01()
     {
         Debug.Log("Moved to first");
@@ -174,7 +186,7 @@ public class Qlearmimg : MonoBehaviour
     }
 
 
-
+    //train function
     public void train(float[][] transition_mat, float[][] reward, float[][] quality_mat, float gamma, float learning_rate, int goal, int max_epoch)
     {
         for (int k = 0; k < max_epoch; k++)
@@ -188,7 +200,7 @@ public class Qlearmimg : MonoBehaviour
                 List<int> possiblenextsteps = GetPossibleStates(next_state, transition_mat);
                 Debug.Log("Current" + current_state);
                 Debug.Log("Next" + next_state);
-
+                //choose among the best probable state which gives the max reward
 
                 float maxq = float.MinValue;
 
@@ -198,12 +210,13 @@ public class Qlearmimg : MonoBehaviour
 
                     int n_s = possiblenextsteps[j];
                     float qs = quality_mat[next_state][n_s];
+                    //update q value matrix based on maximum value
                     if (qs > maxq)
                     {
                         maxq = qs;
                     }
                 }
-
+                // update q matrix with Q-learning algorithmic formula
                 quality_mat[current_state][next_state] = ((1 - learning_rate) * quality_mat[current_state][next_state]) + ((learning_rate) * (reward[current_state][next_state] + gamma * maxq));
                 current_state = next_state;
                 if (current_state == goal)
@@ -223,7 +236,7 @@ public class Qlearmimg : MonoBehaviour
         }
 
     }
-
+    //function to find the max in a container/array
     public int argmax_value(float[] v)
     {
         float maxi = v[0];
@@ -238,6 +251,7 @@ public class Qlearmimg : MonoBehaviour
         }
         return idx;
     }
+    //provide the actual path for agent to walk
     public void agent_walk(int start, int goal, float[][] quality_mat)
     {
         Debug.Log("walking");
@@ -264,6 +278,7 @@ public class Qlearmimg : MonoBehaviour
 
 
     }
+    //move the agent along the learned path to the goal
     IEnumerator agent_move(List<KeyValuePair<int, int>> cur_next)
     {
         int current_state, next_state;
@@ -312,7 +327,7 @@ public class Qlearmimg : MonoBehaviour
         }
 
     }
-
+    //create the adjacency matrix for transition.Choose the points where the Agent can  move byu providing any finite value greater than 0
     public float[][] Create(int size)
     {
         float[][] T_Mat = new float[size][];
@@ -330,7 +345,7 @@ public class Qlearmimg : MonoBehaviour
 
     }
 
-
+    //reward matrix creation. To update rewards change the adjacency matrix cells accordingly.For example if an Agent in state 1 want to go to state 2 ,update the mat[1][2] accordingly
     public float[][] create_reward(int size)
     {
         float[][] R = new float[size][];
@@ -348,7 +363,7 @@ public class Qlearmimg : MonoBehaviour
         return R;
 
     }
-
+    //q value matrix
     public float[][] create_quality(int size)
     {
         float[][] U = new float[size][];
